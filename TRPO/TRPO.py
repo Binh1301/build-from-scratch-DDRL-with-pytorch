@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import os
 
 
-class PolicyNet(nn.Module):
+class PolicyNet(nn.Module): # Mạng chính sách
     def __init__(self, state_dim, action_dim):
         super().__init__()
         self.fc1 = nn.Linear(state_dim, 64)
@@ -23,7 +23,7 @@ class PolicyNet(nn.Module):
         return torch.softmax(logits, dim=-1).clamp(min=1e-8, max=1-1e-8)
 
 
-class ValueNet(nn.Module):
+class ValueNet(nn.Module): # Hàm xấp xỉ hàm giá trị
     def __init__(self, state_dim):
         super().__init__()
         self.fc1 = nn.Linear(state_dim, 64)
@@ -35,10 +35,7 @@ class ValueNet(nn.Module):
         x = torch.tanh(self.fc2(x))
         return self.fc3(x)
 
-# ============================
-# Utils
-# ============================
-def conjugate_gradient(Avp, b, nsteps=10, residual_tol=1e-10):
+def conjugate_gradient(Avp, b, nsteps=10, residual_tol=1e-10): # Giải hệ phương trình Ax = b
     x = torch.zeros_like(b)
     r = b.clone()
     p = r.clone()
@@ -55,7 +52,7 @@ def conjugate_gradient(Avp, b, nsteps=10, residual_tol=1e-10):
         rsold = rsnew
     return x
 
-def flat_params(model):
+def flat_params(model): # Trả về tham số của mô hình dưới dạng vector phẳng
     return torch.cat([p.data.view(-1) for p in model.parameters()])
 
 def set_params(model, new_params):
@@ -75,9 +72,6 @@ def flat_grad(y, model, retain_graph=False, create_graph=False):
     grads = [g if g is not None else torch.zeros_like(p) for g, p in zip(grads, model.parameters())]
     return torch.cat([g.contiguous().view(-1) for g in grads])
 
-# ============================
-# TRPO Training
-# ============================
 def train_trpo(env_name="CartPole-v1", episodes=200, gamma=0.99, max_kl=5e-3, cg_iters=10,
                backtrack_coeff=0.8, backtrack_iters=10, damping=0.1, log_file="trpo_log.csv"):
     env = gym.make(env_name)
@@ -88,7 +82,7 @@ def train_trpo(env_name="CartPole-v1", episodes=200, gamma=0.99, max_kl=5e-3, cg
     value_fn = ValueNet(obs_dim)
     value_optimizer = optim.Adam(value_fn.parameters(), lr=1e-3)
 
-    # CSV log setup
+    # CSV log file
     if os.path.exists(log_file):
         os.remove(log_file)
     f = open(log_file, mode="w", newline="")
@@ -97,7 +91,7 @@ def train_trpo(env_name="CartPole-v1", episodes=200, gamma=0.99, max_kl=5e-3, cg
 
     rewards_history = []
 
-    for ep in range(episodes):
+    for ep in range(episodes): # Mỗi episode
         obs, _ = env.reset()
         obs_list, act_list, rew_list = [], [], []
         done = False
@@ -126,7 +120,7 @@ def train_trpo(env_name="CartPole-v1", episodes=200, gamma=0.99, max_kl=5e-3, cg
         obs_batch = torch.tensor(np.array(obs_list), dtype=torch.float32)
         act_batch = torch.tensor(act_list, dtype=torch.int64)
 
-        # ----- Freeze old policy distribution on this batch -----
+        # Old action probabilities
         with torch.no_grad():
             old_probs = policy(obs_batch).detach()
             old_log_probs_act = torch.log(

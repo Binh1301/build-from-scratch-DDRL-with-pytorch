@@ -13,9 +13,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-"""## Set random seed"""
-
-def seed_torch(seed):
+def seed_torch(seed): # For reproducibility
     torch.manual_seed(seed)
     if torch.backends.cudnn.enabled:
         torch.backends.cudnn.benchmark = False
