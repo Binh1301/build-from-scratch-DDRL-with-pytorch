@@ -33,7 +33,7 @@ def weight_init(m): # tránh vanishing exploding
         nn.init.xavier_uniform_(m.weight)
         nn.init.zeros_(m.bias)
 
-class Actor(nn.Module): # Actor network
+class Actor(nn.Module): # Actor network 
     def __init__(self, state_dim, action_dim, max_action):
         super().__init__()
         self.net = nn.Sequential(

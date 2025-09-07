@@ -318,3 +318,33 @@ if __name__ == "__main__":
 
     # Test
     agent.test("videos/sac")
+
+df = pd.read_csv(log_file)
+plt.figure(figsize=(18, 6))
+
+# Reward từng episode
+plt.subplot(131)
+plt.title("Reward per Episode")
+plt.plot(df["episode"], df["reward"], label="Reward")
+plt.xlabel("Episode"); plt.ylabel("Reward")
+
+# Reward trung bình theo 50 episode
+plt.subplot(132)
+plt.title("Moving Average Reward (window=50)")
+window = 50
+moving_avg = df["reward"].rolling(window).mean()
+plt.plot(df["episode"], moving_avg, color='orange', label=f"MA{window}")
+plt.xlabel("Episode"); plt.ylabel("Reward")
+
+# Losses
+plt.subplot(133)
+plt.title("Losses")
+plt.plot(df["episode"], df["actor_loss"], label="Actor Loss")
+plt.plot(df["episode"], df["qf_loss"], label="Qf Loss")
+plt.plot(df["episode"], df["vf_loss"], label="Vf Loss")
+plt.plot(df["episode"], df["alpha_loss"], label="Alpha Loss")
+plt.xlabel("Episode")
+plt.legend()
+
+plt.tight_layout()
+plt.show()

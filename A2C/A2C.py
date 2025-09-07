@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-def seed_torch(seed): # For reproducibility
+def seed_torch(seed): # Hàm để thiết lập seed cho torch
     torch.manual_seed(seed)
     if torch.backends.cudnn.enabled:
         torch.backends.cudnn.benchmark = False
@@ -26,13 +26,12 @@ np.random.seed(seed)
 seed_torch(seed)
 
 
-def initialize_uniformly(layer: nn.Linear, init_w: float = 3e-3):
-    """Initialize the weights and bias in [-init_w, init_w]."""
+def initialize_uniformly(layer: nn.Linear, init_w: float = 3e-3): # Khởi tạo trọng số đều
     layer.weight.data.uniform_(-init_w, init_w)
     layer.bias.data.uniform_(-init_w, init_w)
 
 
-class Actor(nn.Module):
+class Actor(nn.Module): # Mạng chính sách
     def __init__(self, state_size: int, action_size: int):
         super(Actor, self).__init__()
         self.hidden = nn.Linear(state_size, 128)
@@ -51,7 +50,7 @@ class Actor(nn.Module):
         return action, dist
 
 
-class CriticV(nn.Module):
+class CriticV(nn.Module):   # Hàm xấp xỉ hàm giá trị V value
     def __init__(self, state_size: int):
         super(CriticV, self).__init__()
         self.hidden = nn.Linear(state_size, 128)
@@ -64,7 +63,7 @@ class CriticV(nn.Module):
         return value
 
 
-class A2CAgent:
+class A2CAgent: # Đại lý A2C
     def __init__(self, env: gym.Env, gamma: float, entropy_weight: float, seed: int = 777):
         self.env = env
         self.state_size = self.env.observation_space.shape[0]
@@ -130,7 +129,7 @@ class A2CAgent:
         return actor_loss.item(), critic_loss.item()
 
 
-# ---------------- TRAINING ---------------- #
+
 
 # Environment
 env = gym.make("Pendulum-v1", render_mode=None)
