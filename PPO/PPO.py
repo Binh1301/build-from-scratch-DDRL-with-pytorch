@@ -13,8 +13,7 @@ import torch.optim as optim
 from torch.distributions import Normal
 import matplotlib.pyplot as plt
 
-"""## Set random seed"""
-def seed_torch(seed):
+def seed_torch(seed): # Hàm để thiết lập seed cho torch
     torch.manual_seed(seed)
     if torch.backends.cudnn.enabled:
         torch.backends.cudnn.benchmark = False
@@ -26,13 +25,13 @@ np.random.seed(seed)
 seed_torch(seed)
 
 
-def initialize_uniformly(layer: nn.Linear, init_w: float = 3e-3) -> nn.Linear:
+def initialize_uniformly(layer: nn.Linear, init_w: float = 3e-3) -> nn.Linear: # Khởi tạo trọng số đều
     layer.weight.data.uniform_(-init_w, init_w)
     layer.bias.data.uniform_(-init_w, init_w)
     return layer
 
 
-class Actor(nn.Module):
+class Actor(nn.Module): # Mạng chính sách
     def __init__(self, state_size: int, action_size: int,
                  log_std_min: int = -20, log_std_max: int = 0):
         super(Actor, self).__init__()
@@ -54,7 +53,7 @@ class Actor(nn.Module):
         return action, dist
 
 
-class CriticV(nn.Module):
+class CriticV(nn.Module): # Hàm xấp xỉ hàm giá trị
     def __init__(self, state_size: int):
         super(CriticV, self).__init__()
         self.hidden = nn.Linear(state_size, 128)
@@ -65,7 +64,7 @@ class CriticV(nn.Module):
         return self.out(value)
 
 
-def compute_gae(next_value, rewards, masks, values, gamma, lmbda) -> List:
+def compute_gae(next_value, rewards, masks, values, gamma, lmbda) -> List: # Tính toán Generalized Advantage Estimation (GAE)
     values = values + [next_value]
     gae = 0
     returns: Deque[float] = deque()
@@ -76,7 +75,7 @@ def compute_gae(next_value, rewards, masks, values, gamma, lmbda) -> List:
     return list(returns)
 
 
-def ppo_iter(epoch, mini_batch_size, states, actions, values, log_probs, returns, advantages):
+def ppo_iter(epoch, mini_batch_size, states, actions, values, log_probs, returns, advantages): # Tạo các mini-batch để huấn luyện PPO
     batch_size = states.size(0)
     for _ in range(epoch):
         for _ in range(batch_size // mini_batch_size):
@@ -85,7 +84,7 @@ def ppo_iter(epoch, mini_batch_size, states, actions, values, log_probs, returns
                   log_probs[rand_ids], returns[rand_ids], advantages[rand_ids]
 
 
-class PPOAgent:
+class PPOAgent: # Đại lý PPO
     def __init__(self, env: gym.Env, batch_size: int, gamma: float, tau: float,
                  epsilon: float, epoch: int, rollout_len: int,
                  entropy_weight: float, seed: int = 777):
@@ -187,7 +186,7 @@ class PPOAgent:
         return np.mean(actor_losses), np.mean(critic_losses)
 
 
-class ActionNormalizer(gym.ActionWrapper):
+class ActionNormalizer(gym.ActionWrapper): # Chuẩn hóa hành động trong môi trường
     def action(self, action: np.ndarray):
         low, high = self.action_space.low, self.action_space.high
         scale_factor = (high - low) / 2
@@ -203,7 +202,6 @@ class ActionNormalizer(gym.ActionWrapper):
         return np.clip(action, -1.0, 1.0)
 
 
-# ============ Training ============
 env = gym.make("Pendulum-v1", render_mode=None)
 env = ActionNormalizer(env)
 
@@ -251,7 +249,6 @@ for episode in range(1, max_episodes + 1):
 
 env.close()
 
-# ============ Visualization ============
 plt.figure(figsize=(15, 5))
 plt.subplot(131)
 plt.title("Scores")
