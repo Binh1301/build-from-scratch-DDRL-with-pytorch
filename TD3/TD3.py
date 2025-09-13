@@ -12,7 +12,6 @@ import torch.nn.functional as F
 import torch.optim as optim
 import matplotlib.pyplot as plt
 
-"""## Set random seed"""
 
 def seed_torch(seed):
     torch.manual_seed(seed)
@@ -25,12 +24,7 @@ random.seed(seed)
 np.random.seed(seed)
 seed_torch(seed)
 
-# ============================
-# Replay Buffer
-# ============================
-
 class ReplayBuffer:
-    """A simple numpy replay buffer."""
     def __init__(self, state_size: int, size: int, batch_size: int = 32):
         self.state_memory = np.zeros([size, state_size], dtype=np.float32)
         self.action_memory = np.zeros([size], dtype=np.float32)
@@ -62,10 +56,6 @@ class ReplayBuffer:
     def __len__(self) -> int:
         return self.size
 
-# ============================
-# Gaussian Noise
-# ============================
-
 class GaussianNoise:
     def __init__(self, action_size, min_sigma=1.0, max_sigma=1.0, decay_period=1000000):
         self.action_size = action_size
@@ -79,9 +69,6 @@ class GaussianNoise:
         )
         return np.random.normal(0, sigma, size=self.action_size)
 
-# ============================
-# Actor Network
-# ============================
 
 class Actor(nn.Module):
     def __init__(self, state_size, action_size, init_w=3e-3):
@@ -97,9 +84,6 @@ class Actor(nn.Module):
         x = F.relu(self.hidden2(x))
         return self.out(x).tanh()
 
-# ============================
-# Critic Network
-# ============================
 
 class CriticQ(nn.Module):
     def __init__(self, state_size, init_w=3e-3):
@@ -115,10 +99,6 @@ class CriticQ(nn.Module):
         x = F.relu(self.hidden1(x))
         x = F.relu(self.hidden2(x))
         return self.out(x)
-
-# ============================
-# TD3 Agent
-# ============================
 
 class TD3Agent:
     def __init__(self, env, memory_size, batch_size,
@@ -239,9 +219,6 @@ class TD3Agent:
         for t, s in zip(self.critic2_target.parameters(), self.critic2.parameters()):
             t.data.copy_(tau * s.data + (1.0 - tau) * t.data)
 
-# ============================
-# Training
-# ============================
 
 class ActionNormalizer(gym.ActionWrapper):
     def action(self, action):
@@ -295,9 +272,6 @@ for ep in range(num_episodes):
 
 agent.env.close()
 
-# ============================
-# Visualization
-# ============================
 
 plt.figure(figsize=(15, 5))
 plt.subplot(131)
